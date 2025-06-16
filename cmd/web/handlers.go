@@ -10,7 +10,7 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -20,28 +20,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v", snippet)
-	}
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
 
-	//files := []string{
-	//	"./ui/html/base.html",
-	//	"./ui/html/partials/nav.html",
-	//	"./ui/html/pages/home.html",
-	//}
-	//
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	app.serverError(w, err)
-	//	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	//}
+	app.render(w, http.StatusOK, "home.html", data)
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +43,10 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+
+	app.render(w, http.StatusOK, "view.html", data)
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
